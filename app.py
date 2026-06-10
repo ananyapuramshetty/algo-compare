@@ -44,6 +44,25 @@ def bubble_sort(arr):
 
     return a, comparisons, swaps
 
+def selection_sort(arr):
+    a = arr.copy()
+    comparisons = 0
+    swaps = 0
+
+    for i in range(len(a)):
+        min_idx = i
+
+        for j in range(i+1, len(a)):
+            comparisons += 1
+
+            if a[j] < a[min_idx]:
+                min_idx = j
+
+        a[i], a[min_idx] = a[min_idx], a[i]
+        swaps += 1
+
+    return a, comparisons, swaps
+
 # Quick Sort
 def quick_sort(arr):
     comparisons = [0]
