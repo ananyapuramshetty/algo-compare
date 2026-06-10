@@ -118,3 +118,10 @@ button:hover { filter: brightness(1.03); }
 }
 
 ul { padding-left: 18px; margin: 0; }
+.container{
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+button:hover{
+    opacity:0.9;
+}
