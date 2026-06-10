@@ -58,6 +58,14 @@
         <p class="hint">No data yet — try the example above to get started.</p>
         {% endif %}
       </section>
+      <div class="visualizer">
+    {% for num in original_array %}
+        <div class="bar"
+             style="height:{{ num*3 }}px;">
+            {{ num }}
+        </div>
+    {% endfor %}
+</div>
     </main>
   </body>
 </html>
