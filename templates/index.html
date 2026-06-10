@@ -1,71 +1,145 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Easy Sort Compare</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-  </head>
-  <body>
-    <main class="app-shell">
-      <section class="card">
-        <p class="tag">Simple sorting comparison</p>
-        <h1>See which sort is faster</h1>
-        <p class="lead">Type a few numbers, then compare Insertion Sort and Quick Sort in one click.</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Algorithm Analyzer</title>
 
-        <form method="post" class="form-box">
-          <label for="numbers">Enter numbers</label>
-          <input
-            id="numbers"
-            name="numbers"
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Sorting Algorithm Analyzer</h1>
+
+    <form method="POST">
+        <label>Enter Numbers (comma separated)</label>
+
+        <input
             type="text"
+            name="numbers"
             placeholder="12, 5, 8, 1, 20"
-            value="{{ request.form.get('numbers', '') }}"
+            value="{{ request.form.get('numbers','') }}"
             required
-          />
-          <button type="submit">Compare now</button>
-        </form>
+        >
 
-        {% if error %}
+        <button type="submit">
+            Compare Algorithms
+        </button>
+    </form>
+
+    {% if error %}
         <p class="error">{{ error }}</p>
-        {% endif %}
+    {% endif %}
 
-        {% if original_array is defined %}
-        <section class="result-grid">
-          <article class="mini-box">
-            <h2>Your numbers</h2>
+    {% if original_array is defined %}
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Original Array</h3>
             <p>{{ original_array }}</p>
-          </article>
-          <article class="mini-box">
-            <h2>Sorted result</h2>
+        </div>
+
+        <div class="card">
+            <h3>Sorted Array</h3>
             <p>{{ sorted_array }}</p>
-          </article>
-          <article class="mini-box highlight">
-            <h2>Winner</h2>
+        </div>
+
+        <div class="card winner">
+            <h3>Fastest Algorithm</h3>
             <p>{{ winner }}</p>
-          </article>
-          <article class="mini-box">
-            <h2>Quick facts</h2>
-            <ul>
-              <li>Items: {{ total }}</li>
-              <li>Insertion sort: {{ insertion_time }} s</li>
-              <li>Quick sort: {{ quick_time }} s</li>
-              <li>Insertion swaps: {{ insertion_swaps }}</li>
-            </ul>
-          </article>
-        </section>
-        {% else %}
-        <p class="hint">No data yet — try the example above to get started.</p>
-        {% endif %}
-      </section>
-      <div class="visualizer">
-    {% for num in original_array %}
-        <div class="bar"
-             style="height:{{ num*3 }}px;">
+        </div>
+
+        <div class="card">
+            <h3>Total Elements</h3>
+            <p>{{ total }}</p>
+        </div>
+
+    </div>
+
+    <div class="performance-table">
+
+        <h2>Performance Comparison</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Algorithm</th>
+                    <th>Time (s)</th>
+                    <th>Comparisons</th>
+                    <th>Swaps</th>
+                    <th>Complexity</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Insertion Sort</td>
+                    <td>{{ insertion_time }}</td>
+                    <td>{{ insertion_comp }}</td>
+                    <td>{{ insertion_swaps }}</td>
+                    <td>O(n²)</td>
+                </tr>
+
+                <tr>
+                    <td>Bubble Sort</td>
+                    <td>{{ bubble_time }}</td>
+                    <td>{{ bubble_comp }}</td>
+                    <td>{{ bubble_swaps }}</td>
+                    <td>O(n²)</td>
+                </tr>
+
+                <tr>
+                    <td>Selection Sort</td>
+                    <td>{{ selection_time }}</td>
+                    <td>{{ selection_comp }}</td>
+                    <td>{{ selection_swaps }}</td>
+                    <td>O(n²)</td>
+                </tr>
+
+                <tr>
+                    <td>Merge Sort</td>
+                    <td>{{ merge_time }}</td>
+                    <td>{{ merge_comp }}</td>
+                    <td>N/A</td>
+                    <td>O(n log n)</td>
+                </tr>
+
+                <tr>
+                    <td>Quick Sort</td>
+                    <td>{{ quick_time }}</td>
+                    <td>{{ quick_comp }}</td>
+                    <td>N/A</td>
+                    <td>O(n log n)</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="visualizer">
+
+        {% for num in original_array %}
+        <div
+            class="bar"
+            style="height: {{ num * 3 }}px;"
+        >
             {{ num }}
         </div>
-    {% endfor %}
+        {% endfor %}
+
+    </div>
+
+    {% endif %}
+
 </div>
-    </main>
-  </body>
+
+</body>
 </html>

@@ -3,7 +3,7 @@ import time
 
 app = Flask(__name__)
 
-# Insertion Sort
+# ---------------- INSERTION SORT ----------------
 def insertion_sort(arr):
     a = arr.copy()
     comparisons = 0
@@ -27,6 +27,8 @@ def insertion_sort(arr):
 
     return a, comparisons, swaps
 
+
+# ---------------- BUBBLE SORT ----------------
 def bubble_sort(arr):
     a = arr.copy()
     comparisons = 0
@@ -35,15 +37,17 @@ def bubble_sort(arr):
     n = len(a)
 
     for i in range(n):
-        for j in range(0, n-i-1):
+        for j in range(0, n - i - 1):
             comparisons += 1
 
-            if a[j] > a[j+1]:
-                a[j], a[j+1] = a[j+1], a[j]
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
                 swaps += 1
 
     return a, comparisons, swaps
 
+
+# ---------------- SELECTION SORT ----------------
 def selection_sort(arr):
     a = arr.copy()
     comparisons = 0
@@ -52,27 +56,28 @@ def selection_sort(arr):
     for i in range(len(a)):
         min_idx = i
 
-        for j in range(i+1, len(a)):
+        for j in range(i + 1, len(a)):
             comparisons += 1
 
             if a[j] < a[min_idx]:
                 min_idx = j
 
-        a[i], a[min_idx] = a[min_idx], a[i]
-        swaps += 1
+        if min_idx != i:
+            a[i], a[min_idx] = a[min_idx], a[i]
+            swaps += 1
 
     return a, comparisons, swaps
 
-def merge_sort(arr):
 
+# ---------------- MERGE SORT ----------------
+def merge_sort(arr):
     comparisons = [0]
 
     def sort(a):
-
         if len(a) <= 1:
             return a
 
-        mid = len(a)//2
+        mid = len(a) // 2
 
         left = sort(a[:mid])
         right = sort(a[mid:])
@@ -82,7 +87,6 @@ def merge_sort(arr):
         i = j = 0
 
         while i < len(left) and j < len(right):
-
             comparisons[0] += 1
 
             if left[i] < right[j]:
@@ -99,7 +103,8 @@ def merge_sort(arr):
 
     return sort(arr.copy()), comparisons[0]
 
-# Quick Sort
+
+# ---------------- QUICK SORT ----------------
 def quick_sort(arr):
     comparisons = [0]
 
@@ -125,85 +130,82 @@ def quick_sort(arr):
 
         return sort(left) + middle + sort(right)
 
-    result = sort(arr.copy())
-    return result, comparisons[0]
+    return sort(arr.copy()), comparisons[0]
 
-def linear_search(arr, target):
-
-    comparisons = 0
-
-    for i in range(len(arr)):
-
-        comparisons += 1
-
-        if arr[i] == target:
-            return i, comparisons
-
-    return -1, comparisons
-
-def binary_search(arr, target):
-
-    left = 0
-    right = len(arr)-1
-
-    comparisons = 0
-
-    while left <= right:
-
-        comparisons += 1
-
-        mid = (left + right)//2
-
-        if arr[mid] == target:
-            return mid, comparisons
-
-        elif arr[mid] < target:
-            left = mid + 1
-
-        else:
-            right = mid - 1
-
-    return -1, comparisons
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+
     if request.method == "POST":
         try:
             numbers = request.form["numbers"]
-
             arr = [int(x.strip()) for x in numbers.split(",")]
 
-            start = time.time()
+            # Insertion Sort
+            start = time.perf_counter()
             insertion_result, insertion_comp, insertion_swaps = insertion_sort(arr)
-            insertion_time = time.time() - start
+            insertion_time = time.perf_counter() - start
 
-            start = time.time()
+            # Bubble Sort
+            start = time.perf_counter()
+            bubble_result, bubble_comp, bubble_swaps = bubble_sort(arr)
+            bubble_time = time.perf_counter() - start
+
+            # Selection Sort
+            start = time.perf_counter()
+            selection_result, selection_comp, selection_swaps = selection_sort(arr)
+            selection_time = time.perf_counter() - start
+
+            # Merge Sort
+            start = time.perf_counter()
+            merge_result, merge_comp = merge_sort(arr)
+            merge_time = time.perf_counter() - start
+
+            # Quick Sort
+            start = time.perf_counter()
             quick_result, quick_comp = quick_sort(arr)
-            quick_time = time.time() - start
+            quick_time = time.perf_counter() - start
 
-            winner = (
-                "Insertion Sort"
-                if insertion_time < quick_time
-                else "Quick Sort"
-            )
+            times = {
+                "Insertion Sort": insertion_time,
+                "Bubble Sort": bubble_time,
+                "Selection Sort": selection_time,
+                "Merge Sort": merge_time,
+                "Quick Sort": quick_time
+            }
+
+            winner = min(times, key=times.get)
 
             return render_template(
                 "index.html",
                 original_array=arr,
                 sorted_array=quick_result,
+                winner=winner,
+                total=len(arr),
+
                 insertion_time=round(insertion_time, 8),
-                quick_time=round(quick_time, 8),
                 insertion_comp=insertion_comp,
                 insertion_swaps=insertion_swaps,
-                quick_comp=quick_comp,
-                winner=winner,
-                total=len(arr)
+
+                bubble_time=round(bubble_time, 8),
+                bubble_comp=bubble_comp,
+                bubble_swaps=bubble_swaps,
+
+                selection_time=round(selection_time, 8),
+                selection_comp=selection_comp,
+                selection_swaps=selection_swaps,
+
+                merge_time=round(merge_time, 8),
+                merge_comp=merge_comp,
+
+                quick_time=round(quick_time, 8),
+                quick_comp=quick_comp
             )
 
         except ValueError:
             return render_template(
                 "index.html",
-                error="Enter valid integers separated by commas."
+                error="Please enter valid integers separated by commas."
             )
 
     return render_template("index.html")
