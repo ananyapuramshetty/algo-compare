@@ -93,7 +93,7 @@ def home():
                 total=len(arr)
             )
 
-        except:
+        except ValueError:
             return render_template(
                 "index.html",
                 error="Enter valid integers separated by commas."
