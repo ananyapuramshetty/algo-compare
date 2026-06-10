@@ -27,6 +27,22 @@ def insertion_sort(arr):
 
     return a, comparisons, swaps
 
+def bubble_sort(arr):
+    a = arr.copy()
+    comparisons = 0
+    swaps = 0
+
+    n = len(a)
+
+    for i in range(n):
+        for j in range(0, n-i-1):
+            comparisons += 1
+
+            if a[j] > a[j+1]:
+                a[j], a[j+1] = a[j+1], a[j]
+                swaps += 1
+
+    return a, comparisons, swaps
 
 # Quick Sort
 def quick_sort(arr):
