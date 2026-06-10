@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Easy Sort Compare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="card">
+        <p class="tag">Simple sorting comparison</p>
+        <h1>See which sort is faster</h1>
+        <p class="lead">Type a few numbers, then compare Insertion Sort and Quick Sort in one click.</p>
+
+        <form method="post" class="form-box">
+          <label for="numbers">Enter numbers</label>
+          <input
+            id="numbers"
+            name="numbers"
+            type="text"
+            placeholder="Example: 9, 3, 7, 1"
+            value="{{ request.form.get('numbers', '') }}"
+            required
+          />
+          <button type="submit">Compare now</button>
+        </form>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        {% if original_array is defined %}
+        <section class="result-grid">
+          <article class="mini-box">
+            <h2>Your numbers</h2>
+            <p>{{ original_array }}</p>
+          </article>
+          <article class="mini-box">
+            <h2>Sorted result</h2>
+            <p>{{ sorted_array }}</p>
+          </article>
+          <article class="mini-box highlight">
+            <h2>Winner</h2>
+            <p>{{ winner }}</p>
+          </article>
+          <article class="mini-box">
+            <h2>Quick facts</h2>
+            <ul>
+              <li>Items: {{ total }}</li>
+              <li>Insertion sort: {{ insertion_time }} s</li>
+              <li>Quick sort: {{ quick_time }} s</li>
+              <li>Insertion swaps: {{ insertion_swaps }}</li>
+            </ul>
+          </article>
+        </section>
+        {% else %}
+        <p class="hint">No data yet — try the example above to get started.</p>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>
