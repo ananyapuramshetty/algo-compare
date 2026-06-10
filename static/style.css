@@ -125,3 +125,18 @@ ul { padding-left: 18px; margin: 0; }
 button:hover{
     opacity:0.9;
 }
+
+.visualizer{
+    display:flex;
+    align-items:flex-end;
+    gap:5px;
+    height:350px;
+    margin-top:20px;
+}
+
+.bar{
+    width:40px;
+    background:#3498db;
+    color:white;
+    text-align:center;
+}
