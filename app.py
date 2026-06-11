@@ -1,214 +1,131 @@
 from flask import Flask, render_template, request
 import time
 
+from algorithms.sorting import (
+    bubble_sort,
+    selection_sort,
+    insertion_sort,
+    merge_sort,
+    quick_sort
+)
+
+from algorithms.searching import (
+    linear_search,
+    binary_search
+)
+
+from utils.benchmark import benchmark_algorithm
+from utils.memory_analysis import analyze_memory
+from utils.complexity import complexity_data
+
 app = Flask(__name__)
-
-# ---------------- INSERTION SORT ----------------
-def insertion_sort(arr):
-    a = arr.copy()
-    comparisons = 0
-    swaps = 0
-
-    for i in range(1, len(a)):
-        key = a[i]
-        j = i - 1
-
-        while j >= 0:
-            comparisons += 1
-
-            if a[j] > key:
-                a[j + 1] = a[j]
-                swaps += 1
-                j -= 1
-            else:
-                break
-
-        a[j + 1] = key
-
-    return a, comparisons, swaps
-
-
-# ---------------- BUBBLE SORT ----------------
-def bubble_sort(arr):
-    a = arr.copy()
-    comparisons = 0
-    swaps = 0
-
-    n = len(a)
-
-    for i in range(n):
-        for j in range(0, n - i - 1):
-            comparisons += 1
-
-            if a[j] > a[j + 1]:
-                a[j], a[j + 1] = a[j + 1], a[j]
-                swaps += 1
-
-    return a, comparisons, swaps
-
-
-# ---------------- SELECTION SORT ----------------
-def selection_sort(arr):
-    a = arr.copy()
-    comparisons = 0
-    swaps = 0
-
-    for i in range(len(a)):
-        min_idx = i
-
-        for j in range(i + 1, len(a)):
-            comparisons += 1
-
-            if a[j] < a[min_idx]:
-                min_idx = j
-
-        if min_idx != i:
-            a[i], a[min_idx] = a[min_idx], a[i]
-            swaps += 1
-
-    return a, comparisons, swaps
-
-
-# ---------------- MERGE SORT ----------------
-def merge_sort(arr):
-    comparisons = [0]
-
-    def sort(a):
-        if len(a) <= 1:
-            return a
-
-        mid = len(a) // 2
-
-        left = sort(a[:mid])
-        right = sort(a[mid:])
-
-        result = []
-
-        i = j = 0
-
-        while i < len(left) and j < len(right):
-            comparisons[0] += 1
-
-            if left[i] < right[j]:
-                result.append(left[i])
-                i += 1
-            else:
-                result.append(right[j])
-                j += 1
-
-        result.extend(left[i:])
-        result.extend(right[j:])
-
-        return result
-
-    return sort(arr.copy()), comparisons[0]
-
-
-# ---------------- QUICK SORT ----------------
-def quick_sort(arr):
-    comparisons = [0]
-
-    def sort(a):
-        if len(a) <= 1:
-            return a
-
-        pivot = a[len(a) // 2]
-
-        left = []
-        middle = []
-        right = []
-
-        for x in a:
-            comparisons[0] += 1
-
-            if x < pivot:
-                left.append(x)
-            elif x > pivot:
-                right.append(x)
-            else:
-                middle.append(x)
-
-        return sort(left) + middle + sort(right)
-
-    return sort(arr.copy()), comparisons[0]
 
 
 @app.route("/", methods=["GET", "POST"])
-def home():
+def index():
+
+    sorting_results = {}
+    searching_results = {}
+
+    fastest_algorithm = None
+    lowest_memory_algorithm = None
 
     if request.method == "POST":
-        try:
-            numbers = request.form["numbers"]
-            arr = [int(x.strip()) for x in numbers.split(",")]
 
-            # Insertion Sort
+        numbers = list(map(int, request.form["numbers"].split(",")))
+
+        target = request.form.get("target")
+
+        sorting_algorithms = {
+            "Bubble Sort": bubble_sort,
+            "Selection Sort": selection_sort,
+            "Insertion Sort": insertion_sort,
+            "Merge Sort": merge_sort,
+            "Quick Sort": quick_sort
+        }
+
+        # SORTING ANALYSIS
+        for name, algorithm in sorting_algorithms.items():
+
             start = time.perf_counter()
-            insertion_result, insertion_comp, insertion_swaps = insertion_sort(arr)
-            insertion_time = time.perf_counter() - start
 
-            # Bubble Sort
-            start = time.perf_counter()
-            bubble_result, bubble_comp, bubble_swaps = bubble_sort(arr)
-            bubble_time = time.perf_counter() - start
+            sorted_array = algorithm(numbers.copy())
 
-            # Selection Sort
-            start = time.perf_counter()
-            selection_result, selection_comp, selection_swaps = selection_sort(arr)
-            selection_time = time.perf_counter() - start
+            execution_time = time.perf_counter() - start
 
-            # Merge Sort
-            start = time.perf_counter()
-            merge_result, merge_comp = merge_sort(arr)
-            merge_time = time.perf_counter() - start
+            benchmark = benchmark_algorithm(algorithm, numbers)
 
-            # Quick Sort
-            start = time.perf_counter()
-            quick_result, quick_comp = quick_sort(arr)
-            quick_time = time.perf_counter() - start
+            memory = analyze_memory(algorithm, numbers)
 
-            times = {
-                "Insertion Sort": insertion_time,
-                "Bubble Sort": bubble_time,
-                "Selection Sort": selection_time,
-                "Merge Sort": merge_time,
-                "Quick Sort": quick_time
+            sorting_results[name] = {
+                "sorted_array": sorted_array,
+                "execution_time": execution_time,
+                "average_time": benchmark["average"],
+                "minimum_time": benchmark["minimum"],
+                "maximum_time": benchmark["maximum"],
+                "std_dev": benchmark["std_dev"],
+                "peak_memory": memory["peak_memory"]
             }
 
-            winner = min(times, key=times.get)
+        # Fastest sorting algorithm
+        fastest_algorithm = min(
+            sorting_results,
+            key=lambda x: sorting_results[x]["average_time"]
+        )
 
-            return render_template(
-                "index.html",
-                original_array=arr,
-                sorted_array=quick_result,
-                winner=winner,
-                total=len(arr),
+        # Lowest memory algorithm
+        lowest_memory_algorithm = min(
+            sorting_results,
+            key=lambda x: sorting_results[x]["peak_memory"]
+        )
 
-                insertion_time=round(insertion_time, 8),
-                insertion_comp=insertion_comp,
-                insertion_swaps=insertion_swaps,
+        # SEARCHING ANALYSIS
+        if target:
 
-                bubble_time=round(bubble_time, 8),
-                bubble_comp=bubble_comp,
-                bubble_swaps=bubble_swaps,
+            target = int(target)
 
-                selection_time=round(selection_time, 8),
-                selection_comp=selection_comp,
-                selection_swaps=selection_swaps,
+            # Binary search requires sorted array
+            sorted_numbers = sorted(numbers)
 
-                merge_time=round(merge_time, 8),
-                merge_comp=merge_comp,
+            search_algorithms = {
+                "Linear Search": (
+                    numbers,
+                    linear_search
+                ),
 
-                quick_time=round(quick_time, 8),
-                quick_comp=quick_comp
-            )
+                "Binary Search": (
+                    sorted_numbers,
+                    binary_search
+                )
+            }
 
-        except ValueError:
-            return render_template(
-                "index.html",
-                error="Please enter valid integers separated by commas."
-            )
+            for name, (data, algorithm) in search_algorithms.items():
 
-    return render_template("index.html")
+                start = time.perf_counter()
+
+                index_found, comparisons = algorithm(data, target)
+
+                execution_time = time.perf_counter() - start
+
+                searching_results[name] = {
+                    "index": index_found,
+                    "comparisons": comparisons,
+                    "execution_time": execution_time
+                }
+
+    return render_template(
+        "index.html",
+
+        sorting_results=sorting_results,
+
+        searching_results=searching_results,
+
+        fastest_algorithm=fastest_algorithm,
+
+        lowest_memory_algorithm=lowest_memory_algorithm,
+
+        complexity_data=complexity_data
+    )
 
 
 if __name__ == "__main__":

@@ -1,145 +1,198 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorting Algorithm Analyzer</title>
-
+    <title>Algorithm Comparator</title>
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<div class="container">
+<h1>Algorithm Comparator</h1>
 
-    <h1>Sorting Algorithm Analyzer</h1>
+<form method="POST">
 
-    <form method="POST">
-        <label>Enter Numbers (comma separated)</label>
+    <h2>Input Array</h2>
 
-        <input
-            type="text"
-            name="numbers"
-            placeholder="12, 5, 8, 1, 20"
-            value="{{ request.form.get('numbers','') }}"
-            required
-        >
+    <input
+        type="text"
+        name="numbers"
+        placeholder="Example: 5,2,9,1,8"
+        required>
 
-        <button type="submit">
-            Compare Algorithms
-        </button>
-    </form>
+    <h2>Target Value (For Searching)</h2>
 
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
+    <input
+        type="number"
+        name="target"
+        placeholder="Example: 9">
 
-    {% if original_array is defined %}
+    <br><br>
 
-    <div class="cards">
+    <button type="submit">
+        Analyze Algorithms
+    </button>
 
-        <div class="card">
-            <h3>Original Array</h3>
-            <p>{{ original_array }}</p>
-        </div>
+</form>
 
-        <div class="card">
-            <h3>Sorted Array</h3>
-            <p>{{ sorted_array }}</p>
-        </div>
 
-        <div class="card winner">
-            <h3>Fastest Algorithm</h3>
-            <p>{{ winner }}</p>
-        </div>
+{% if fastest_algorithm %}
 
-        <div class="card">
-            <h3>Total Elements</h3>
-            <p>{{ total }}</p>
-        </div>
+<hr>
 
+<h2>Performance Summary</h2>
+
+<div class="card-container">
+
+    <div class="card">
+        <h3>Fastest Algorithm</h3>
+        <p>{{ fastest_algorithm }}</p>
     </div>
 
-    <div class="performance-table">
-
-        <h2>Performance Comparison</h2>
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>Algorithm</th>
-                    <th>Time (s)</th>
-                    <th>Comparisons</th>
-                    <th>Swaps</th>
-                    <th>Complexity</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                <tr>
-                    <td>Insertion Sort</td>
-                    <td>{{ insertion_time }}</td>
-                    <td>{{ insertion_comp }}</td>
-                    <td>{{ insertion_swaps }}</td>
-                    <td>O(n²)</td>
-                </tr>
-
-                <tr>
-                    <td>Bubble Sort</td>
-                    <td>{{ bubble_time }}</td>
-                    <td>{{ bubble_comp }}</td>
-                    <td>{{ bubble_swaps }}</td>
-                    <td>O(n²)</td>
-                </tr>
-
-                <tr>
-                    <td>Selection Sort</td>
-                    <td>{{ selection_time }}</td>
-                    <td>{{ selection_comp }}</td>
-                    <td>{{ selection_swaps }}</td>
-                    <td>O(n²)</td>
-                </tr>
-
-                <tr>
-                    <td>Merge Sort</td>
-                    <td>{{ merge_time }}</td>
-                    <td>{{ merge_comp }}</td>
-                    <td>N/A</td>
-                    <td>O(n log n)</td>
-                </tr>
-
-                <tr>
-                    <td>Quick Sort</td>
-                    <td>{{ quick_time }}</td>
-                    <td>{{ quick_comp }}</td>
-                    <td>N/A</td>
-                    <td>O(n log n)</td>
-                </tr>
-
-            </tbody>
-
-        </table>
-
+    <div class="card">
+        <h3>Lowest Memory Usage</h3>
+        <p>{{ lowest_memory_algorithm }}</p>
     </div>
-
-    <div class="visualizer">
-
-        {% for num in original_array %}
-        <div
-            class="bar"
-            style="height: {{ num * 3 }}px;"
-        >
-            {{ num }}
-        </div>
-        {% endfor %}
-
-    </div>
-
-    {% endif %}
 
 </div>
+
+<hr>
+
+<h2>Sorting Algorithm Comparison</h2>
+
+<table>
+
+<tr>
+    <th>Algorithm</th>
+    <th>Execution Time</th>
+    <th>Average Time</th>
+    <th>Minimum Time</th>
+    <th>Maximum Time</th>
+    <th>Std Dev</th>
+    <th>Peak Memory</th>
+</tr>
+
+{% for algorithm, result in sorting_results.items() %}
+
+<tr>
+
+<td>{{ algorithm }}</td>
+
+<td>{{ "%.8f"|format(result.execution_time) }}</td>
+
+<td>{{ "%.8f"|format(result.average_time) }}</td>
+
+<td>{{ "%.8f"|format(result.minimum_time) }}</td>
+
+<td>{{ "%.8f"|format(result.maximum_time) }}</td>
+
+<td>{{ "%.8f"|format(result.std_dev) }}</td>
+
+<td>{{ result.peak_memory }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<hr>
+
+<h2>Searching Algorithm Comparison</h2>
+
+<table>
+
+<tr>
+    <th>Algorithm</th>
+    <th>Index Found</th>
+    <th>Comparisons</th>
+    <th>Execution Time</th>
+</tr>
+
+{% for algorithm, result in searching_results.items() %}
+
+<tr>
+
+<td>{{ algorithm }}</td>
+
+<td>{{ result.index }}</td>
+
+<td>{{ result.comparisons }}</td>
+
+<td>{{ "%.8f"|format(result.execution_time) }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<hr>
+
+<h2>Complexity Analysis</h2>
+
+<table>
+
+<tr>
+    <th>Algorithm</th>
+    <th>Best Case</th>
+    <th>Average Case</th>
+    <th>Worst Case</th>
+    <th>Space Complexity</th>
+</tr>
+
+{% for algorithm, values in complexity_data.items() %}
+
+<tr>
+
+<td>{{ algorithm }}</td>
+
+<td>{{ values.best }}</td>
+
+<td>{{ values.average }}</td>
+
+<td>{{ values.worst }}</td>
+
+<td>{{ values.space }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<hr>
+
+<h2>AI Insights</h2>
+
+<div class="insights">
+
+<h3>Quick Sort</h3>
+<p>
+Efficient sorting techniques are useful during data preprocessing
+in AI and machine learning pipelines.
+</p>
+
+<h3>Binary Search</h3>
+<p>
+Binary Search demonstrates search-space reduction, a principle
+used in optimization and intelligent systems.
+</p>
+
+<h3>Merge Sort</h3>
+<p>
+Merge Sort is suitable for handling large datasets and external
+sorting tasks.
+</p>
+
+<h3>Linear Search</h3>
+<p>
+Linear Search is useful when datasets are unsorted and direct
+searching is required.
+</p>
+
+</div>
+
+{% endif %}
 
 </body>
 </html>
